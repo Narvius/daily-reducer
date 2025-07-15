@@ -1,30 +1,24 @@
 use std::fmt::Write as _;
 
+/// A list of all available games.
 #[rustfmt::skip]
-pub const PROCESSORS: &[Processor] = &[
-    p("Daily Akari", "https://dailyakari.com/", daily_akari),
-    p("Bracket City", "https://www.theatlantic.com/games/bracket-city/", bracket_city),
-    p("Duotrigordle", "https://duotrigordle.com/", duotrigordle),
-    p("Clues by Sam", "https://cluesbysam.com/", clues_by_sam),
+pub const GAMES: &[Game] = &[
+    Game { name: "Daily Akari", url: "https://dailyakari.com/", processor: daily_akari },
+    Game { name: "Bracket City", url: "https://www.theatlantic.com/games/bracket-city/", processor: bracket_city },
+    Game { name: "Duotrigordle", url: "https://duotrigordle.com/", processor: duotrigordle },
+    Game { name: "Clues by Sam", url: "https://cluesbysam.com/", processor: clues_by_sam },
 ];
 
+/// A single Daily Game for which blurb shortening is implemented.
 #[derive(Copy, Clone)]
-pub struct Processor {
+pub struct Game {
+    /// The name of the game.
     pub name: &'static str,
+    /// Website URL the game can be found at.
     pub url: &'static str,
-    pub process: fn(&str) -> Option<String>,
+    /// Function that shortens the results blurb of the game.
+    pub processor: fn(&str) -> Option<String>,
 }
-
-const fn p(
-    name: &'static str,
-    url: &'static str,
-    process: fn(&str) -> Option<String>,
-) -> Processor {
-    Processor { name, url, process }
-}
-
-// ========================
-// ========================
 
 fn daily_akari(input: &str) -> Option<String> {
     input.starts_with("Daily Akari 😊").then(|| {
@@ -92,13 +86,10 @@ fn clues_by_sam(input: &str) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    /// Given a test name and a [`Processor`], checks that it correctly [detects] it can process an
-    /// input file; and that the output of [processing it] matches the expected output. The two files
-    /// describing the input and output are in the `data` directory in the project root; and are named
-    /// `{test name}` and `{test name}_result`, respectively.
-    ///
-    /// [detects]: Processor::detect
-    /// [processing it]: Processor::process
+    /// Given the name of a `fn(&str) -> Option<String>` that is in scope in `super`; and a list of
+    /// numbers corresponding to existing test cases; creates a test with the same name, wherein it
+    /// gives the contents of "../data/{name}{test_case_nr}" to the function, and compares the
+    /// output with the contents of "../data/{name}{test_case_nr}_result".
     #[cfg(test)]
     macro_rules! file_test {
     ($processor:ident, $($id:literal),+) => {
