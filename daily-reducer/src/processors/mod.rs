@@ -12,7 +12,10 @@ pub const ALL_PROCESSORS: &[&dyn Processor] = &[
 
 /// General trait for processing Daily Game result snippets.
 pub trait Processor {
+    /// The name of the game.
     fn name(&self) -> &'static str;
+    /// URL to the game.
+    fn url(&self) -> &'static str;
     /// Whether this processor applies to the given piece of text.
     fn detect(&self, block: &str) -> bool;
     /// Summarize the Daily Game snippet into one line.
@@ -34,7 +37,8 @@ macro_rules! file_test {
             use $crate::processors::Processor;
 
             const INPUT: &str = include_str!(concat!("../../data/", stringify!($test_name)));
-            const OUTPUT: &str = include_str!(concat!("../../data/", stringify!($test_name), "_result"));
+            const OUTPUT: &str =
+                include_str!(concat!("../../data/", stringify!($test_name), "_result"));
 
             assert!($processor.detect(INPUT));
             assert_eq!($processor.process(INPUT).as_deref(), Some(OUTPUT.trim()));
