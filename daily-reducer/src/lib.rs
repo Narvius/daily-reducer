@@ -2,6 +2,8 @@ use chrono::Datelike;
 
 mod processors;
 
+pub use processors::{PROCESSORS, Processor};
+
 /// Automatically reduces results blurbs from various daily games.
 #[derive(Clone, Default)]
 pub struct DailyReducer {
@@ -45,7 +47,12 @@ impl DailyReducer {
             _ => "th",
         };
 
-        let block = self.items.iter().map(|(_, line)| line.as_str()).collect::<Vec<_>>().join("\n");
+        let block = self
+            .items
+            .iter()
+            .map(|(_, line)| line.as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
 
         format!("{month} {day}{suffix}, {year}\n\n---\n\n{block}\n\n---\n\n")
     }
@@ -58,7 +65,7 @@ impl DailyReducer {
                     None => {
                         self.items.push((game, line));
                         self.items.sort_unstable_by_key(|k| k.0);
-                    },
+                    }
                 }
                 true
             })
@@ -80,31 +87,30 @@ impl DailyReducer {
     }
 }
 
-/// Returns the names of all supported daily games.
-pub fn supported_games() -> Vec<&'static str> {
-    processors::ALL_PROCESSORS.iter().map(|p| p.name()).collect()
+/// Returns the names and URLs of all supported daily games.
+pub fn supported_games() -> Vec<(&'static str, &'static str)> {
+    PROCESSORS.iter().map(|p| (p.name, p.url)).collect()
 }
 
 /// Shortens the results string of a daily game, and returns the name of the game alongside the
 /// shortened result.
 fn shorten(input: &str) -> Result<(&'static str, String), Error> {
     let input = input.trim();
-    let processors: Vec<_> = processors::ALL_PROCESSORS.iter().filter(|p| p.detect(input)).collect();
-    let processor = match processors.as_slice() {
-        [p] => p,
-        [] => return Err(Error::NoProcessor),
-        _ => return Err(Error::AmbiguousProcessor),
-    };
+    let mut results = PROCESSORS
+        .iter()
+        .filter_map(|p| (p.process)(input).map(|r| (p.name, r)));
 
-    Ok((processor.name(), processor.process(input).ok_or(Error::ProcessingFailed)?))
+    match (results.next(), results.next()) {
+        (Some(r), None) => Ok(r),
+        (_, Some(_)) => Err(Error::MultipleResults),
+        (None, None) => Err(Error::NoResults),
+    }
 }
 
 /// Errors that can occur whilst shortening.
 enum Error {
-    /// Input doesn't match any supported game.
-    NoProcessor,
-    /// Input matches more than one supported game.
-    AmbiguousProcessor,
-    /// Unexpected input lead to failed processing.
-    ProcessingFailed,
+    /// No processor returned a useable result.
+    NoResults,
+    /// Multiple processors returned useable results.
+    MultipleResults,
 }
