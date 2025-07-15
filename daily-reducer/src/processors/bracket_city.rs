@@ -7,6 +7,10 @@ impl super::Processor for BracketCity {
         "Bracket City"
     }
 
+    fn url(&self) -> &'static str {
+        "https://www.theatlantic.com/games/bracket-city/"
+    }
+
     fn detect(&self, block: &str) -> bool {
         block.starts_with("[Bracket City]")
     }
@@ -15,7 +19,7 @@ impl super::Processor for BracketCity {
         // After the rank line, there are 1-3 lines with stats, then a blank line, then the score.
         let mut s = "Bracket City".to_owned();
         let mut score = false;
-        
+
         for line in block.lines().skip(5) {
             if score {
                 match line.strip_prefix("Total Score: ") {
@@ -31,7 +35,6 @@ impl super::Processor for BracketCity {
             } else {
                 score = true;
             }
-            
         }
         Some(s)
     }

@@ -5,13 +5,21 @@ impl super::Processor for Duotrigordle {
         "Duotrigordle"
     }
 
+    fn url(&self) -> &'static str {
+        "https://duotrigordle.com/"
+    }
+
     fn detect(&self, block: &str) -> bool {
         block.starts_with("Daily Duotrigordle")
     }
 
     fn process(&self, block: &str) -> Option<String> {
         let mut lines = block.lines().take(2);
-        Some(format!("{} -- {}", lines.next()?, lines.next()?.split_once(' ')?.1))
+        Some(format!(
+            "{} -- {}",
+            lines.next()?,
+            lines.next()?.split_once(' ')?.1
+        ))
     }
 }
 

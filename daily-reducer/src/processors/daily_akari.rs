@@ -5,12 +5,21 @@ impl super::Processor for DailyAkari {
         "Daily Akari"
     }
 
+    fn url(&self) -> &'static str {
+        "https://dailyakari.com/"
+    }
+
     fn detect(&self, block: &str) -> bool {
         block.starts_with("Daily Akari 😊")
     }
 
     fn process(&self, block: &str) -> Option<String> {
-        let time = block.lines().nth(2)?.trim_end_matches('✅').rsplit_once(' ')?.1;
+        let time = block
+            .lines()
+            .nth(2)?
+            .trim_end_matches('✅')
+            .rsplit_once(' ')?
+            .1;
         Some(format!("Daily Akari 😊 -- ✅ Solved in {time} ✅"))
     }
 }

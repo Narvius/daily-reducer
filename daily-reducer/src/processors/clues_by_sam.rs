@@ -5,6 +5,10 @@ impl super::Processor for CluesBySam {
         "Clues by Sam"
     }
 
+    fn url(&self) -> &'static str {
+        "https://cluesbysam.com/"
+    }
+
     fn detect(&self, block: &str) -> bool {
         block.starts_with("I solved the daily Clues by Sam") || block.starts_with("Clues by Sam")
     }
