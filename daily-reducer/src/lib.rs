@@ -1,8 +1,8 @@
 use chrono::Datelike;
 
-mod processors;
+mod games;
 
-pub use processors::{PROCESSORS, Processor};
+pub use games::{GAMES, Game};
 
 /// Automatically reduces results blurbs from various daily games.
 #[derive(Clone, Default)]
@@ -87,18 +87,13 @@ impl DailyReducer {
     }
 }
 
-/// Returns the names and URLs of all supported daily games.
-pub fn supported_games() -> Vec<(&'static str, &'static str)> {
-    PROCESSORS.iter().map(|p| (p.name, p.url)).collect()
-}
-
 /// Shortens the results string of a daily game, and returns the name of the game alongside the
 /// shortened result.
 fn shorten(input: &str) -> Result<(&'static str, String), Error> {
     let input = input.trim();
-    let mut results = PROCESSORS
+    let mut results = GAMES
         .iter()
-        .filter_map(|p| (p.process)(input).map(|r| (p.name, r)));
+        .filter_map(|p| (p.processor)(input).map(|r| (p.name, r)));
 
     match (results.next(), results.next()) {
         (Some(r), None) => Ok(r),
