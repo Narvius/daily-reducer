@@ -25,7 +25,6 @@ fn App() -> Html {
                         .unwrap()
                         .set_value(reducer.to_forum_block().as_str());
                 } else {
-                    // TODO show an error without replacing `results`
                     warning.set(Some(format!(
                         "Failed to detect game for:\n\n{}",
                         target.value()

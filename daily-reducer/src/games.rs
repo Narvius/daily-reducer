@@ -1,3 +1,5 @@
+//! Contains the actual implementations for game parsers.
+
 use std::fmt::Write as _;
 
 /// A list of all available games.
@@ -60,7 +62,7 @@ fn bracket_city(input: &str) -> Option<String> {
 
 fn duotrigordle(input: &str) -> Option<String> {
     input.starts_with("Daily Duotrigordle").then(|| {
-        let mut lines = input.lines().take(2);
+        let mut lines = input.lines();
         Some(format!(
             "{} -- {}",
             lines.next()?,

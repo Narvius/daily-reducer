@@ -1,3 +1,9 @@
+//! Implements the actual string manipulation functionality that powers the string reducer app.
+//!
+//! Of primary interest are [`GAMES`] (which contains a list of all games for which parsing is
+//! implemented), and [`DailyReducer`], which exposes a convenient way of using implemented
+//! parsers.
+
 use chrono::Datelike;
 
 mod games;
@@ -57,6 +63,9 @@ impl DailyReducer {
         format!("{month} {day}{suffix}, {year}\n\n---\n\n{block}\n\n---\n\n")
     }
 
+    /// Parses the provided `blurb` and stores the shortened output; returns true if successful,
+    /// false otherwise. Existing shortened output for the same game is overwritten, which still
+    /// counts as a success.
     pub fn insert(&mut self, blurb: &str) -> bool {
         shorten(blurb)
             .map(|(game, line)| {
@@ -72,16 +81,14 @@ impl DailyReducer {
             .unwrap_or(false)
     }
 
+    /// Removes the `n`th game in the list (sorted alphabetically).
     pub fn remove(&mut self, index: usize) {
         if index < self.items.len() {
             self.items.remove(index);
         }
     }
 
-    pub fn get(&self, game: &str) -> Option<&(&'static str, String)> {
-        self.items.iter().find(|(g, _)| *g == game)
-    }
-
+    /// Iterates over all games that have a shortened line in this [`DailyReducer`].
     pub fn iter(&self) -> impl Iterator<Item = &(&'static str, String)> {
         self.items.iter()
     }
