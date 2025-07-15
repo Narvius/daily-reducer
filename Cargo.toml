@@ -1,0 +1,3 @@
+[workspace]
+members = ["app", "daily-reducer"]
+resolver = "2"
