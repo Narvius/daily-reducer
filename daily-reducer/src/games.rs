@@ -75,11 +75,24 @@ fn clues_by_sam(input: &str) -> Option<String> {
     (input.starts_with("I solved the daily Clues by Sam") || input.starts_with("Clues by Sam"))
         .then(|| {
             let mut lines = input.lines();
-            let (time, checks) = if input.starts_with("Clues by Sam") {
+            let time = if input.starts_with("Clues by Sam") {
                 lines.next();
-                (lines.next()?, lines.next()?)
+                lines.next()?.to_lowercase()
             } else {
-                (lines.next()?.split_once(") in ")?.1, lines.next()?)
+                lines.next()?.split_once(") in ")?.1.to_lowercase()
+            };
+
+            let chars = ['🟩', '🟨', '🟡', '🟠'];
+            let scores = chars.map(|t| input.chars().filter(|&c| c == t).count());
+
+            let checks = match scores {
+                [_, 0, 0, 0] => "🟩".to_owned(),
+                _ => scores[1..]
+                    .iter()
+                    .zip(&chars[1..])
+                    .flat_map(|(&n, &c)| (n > 0).then(|| format!("{n} {c}")))
+                    .collect::<Vec<_>>()
+                    .join(", "),
             };
 
             Some(format!("Clues by Sam -- {checks} in {time}"))

@@ -67,8 +67,8 @@ impl DailyReducer {
     /// false otherwise. Existing shortened output for the same game is overwritten, which still
     /// counts as a success.
     pub fn insert(&mut self, blurb: &str) -> bool {
-        shorten(blurb)
-            .map(|(game, line)| {
+        match shorten(blurb) {
+            Some((game, line)) => {
                 match self.items.iter_mut().find(|(g, _)| *g == game) {
                     Some((_, l)) => *l = line,
                     None => {
@@ -77,8 +77,9 @@ impl DailyReducer {
                     }
                 }
                 true
-            })
-            .unwrap_or(false)
+            }
+            None => false,
+        }
     }
 
     /// Removes the `n`th game in the list (sorted alphabetically).
@@ -96,23 +97,10 @@ impl DailyReducer {
 
 /// Shortens the results string of a daily game, and returns the name of the game alongside the
 /// shortened result.
-fn shorten(input: &str) -> Result<(&'static str, String), Error> {
+fn shorten(input: &str) -> Option<(&'static str, String)> {
     let input = input.trim();
-    let mut results = GAMES
+    GAMES
         .iter()
-        .filter_map(|p| (p.processor)(input).map(|r| (p.name, r)));
-
-    match (results.next(), results.next()) {
-        (Some(r), None) => Ok(r),
-        (_, Some(_)) => Err(Error::MultipleResults),
-        (None, None) => Err(Error::NoResults),
-    }
-}
-
-/// Errors that can occur whilst shortening.
-enum Error {
-    /// No processor returned a useable result.
-    NoResults,
-    /// Multiple processors returned useable results.
-    MultipleResults,
+        .filter_map(|g| (g.processor)(input).map(|r| (g.name, r)))
+        .next()
 }
